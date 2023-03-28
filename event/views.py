@@ -79,8 +79,8 @@ class UserDetails(APIView):
         raise PermissionDenied("User Not Have Permission")
 
 class UserLogin(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
     def post(self,request):
         username=request.data['username']
         password=request.data['password']
