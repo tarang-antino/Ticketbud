@@ -4,7 +4,9 @@ from event.models import *
 class UserSer(serializers.ModelSerializer):
     class Meta:
         model=User
-        fields=['id','name','phoneNumber','username','password','isAdmin','eventBooked']
+        fields=['id','name','phoneNumber','username','password','isAdmin'
+                # ,'eventBooked'
+                ]
         extra_kwargs={
             'password':{'write_only':True}
         }
