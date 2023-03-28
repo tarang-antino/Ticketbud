@@ -16,7 +16,7 @@ db.sqlite3
 
 # Environments
 .env
-venv/
+.venv
 media/
 
 migrations/
