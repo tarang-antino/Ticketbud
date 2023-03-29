@@ -53,17 +53,17 @@ CORS_ALLOW_METHODS = [
     "PUT",
 ]
 
-CORS_ALLOW_HEADERS = [
-     "accept",
-     "accept-encoding",
-     "authorization",
-     "content-type",
-     "dnt",
-     "origin",
-     "user-agent",
-     "x-csrftoken",
-     "x-requested-with",
- ]
+# CORS_ALLOW_HEADERS = [
+#     "accept",
+#     "accept-encoding",
+#     "authorization",
+#     "content-type",
+#     "dnt",
+#     "origin",
+#     "user-agent",
+#     "x-csrftoken",
+#     "x-requested-with",
+# ]
 
 # Application definition
 
@@ -74,10 +74,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders',
     'event',
     'rest_framework',
     'rest_framework_simplejwt',
+    "corsheaders",
 ]
 
 REST_FRAMEWORK={
@@ -133,15 +133,22 @@ SIMPLE_JWT = {
 }
 
 
+# CORS_ORIGIN_WHITELIST=(
+#     'http://localhost:4200',
+# )
+
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
+    # "django.middleware.common.CommonMiddleware",
 ]
 
 ROOT_URLCONF = 'EventManagement.urls'
@@ -168,17 +175,19 @@ WSGI_APPLICATION = 'EventManagement.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#database
+# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'event',
+        'USER':config('USER'),
+        'PASSWORD':config('PASSWORD')
+    }
+}
+
 
 # Password validation
-DATABASES = {
-
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ticketdb',
-        'USER':config('USER') ,
-    }
-}
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [

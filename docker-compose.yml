@@ -1,0 +1,10 @@
+version: '3.4'
+services:
+  ticket:
+     image: ticket-bud
+     build:
+      context: .
+      dockerfile: ./Dockerfile
+     container_name: ticketbud-be
+     ports:
+       - 8080:8080
