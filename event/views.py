@@ -12,6 +12,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.http import Http404
 
 
+#isAdmin must be mapped to is_superuser in serializers
+
 class UserList(APIView):
     
     authentication_classes = [JWTAuthentication]
@@ -37,6 +39,51 @@ class UserList(APIView):
             # return Response(serializers1.data,status=status.HTTP_201_CREATED)
         return Response(serializers1.errors,status=status.HTTP_400_BAD_REQUEST)
 
+#used to directly access the user using tokens
+# class UserDetails(APIView):
+#     authentication_classes = [JWTAuthentication]
+#     permission_classes = [IsAuthenticated]
+#     def get_object(self,pk):
+#         try:
+#             user=User.objects.get(id=pk)
+#         except User.DoesNotExist:
+#             raise Http404
+#         return user
+#     def get(self,request):
+#         pk=request.user.id
+#         user=self.get_object(pk)
+#         serializers=UserSer(user)
+#         username = request.user.username #gets the username of the user in the token
+#         print("----------",username)
+#         # print("-------------",user)
+#         # print("-------------",request.user.isAdmin)
+#         if isUser(username,serializers):
+#             r=Response(serializers.data,status=status.HTTP_200_OK)
+#             r.headers["Access-Control-Allow-Origin"] = "*"
+#             return r
+#         raise PermissionDenied("User Not Have Permission")
+#     def put(self,request):
+#         pk=request.user.id
+#         user=self.get_object(pk)
+#         serializers=UserSer(user,data=request.data)
+#         if serializers.is_valid():
+#             serializers.save()
+#             username = request.user.username
+#             # return Response(serializers.data,status=status.HTTP_201_CREATED)
+#             if isUser(username,serializers):
+#                 return Response(serializers.data,status=status.HTTP_201_CREATED)
+#             raise PermissionDenied("User Not Have Permission")
+#         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+#     def delete(self,request):
+#         pk=request.user.id
+#         user=self.get_object(pk)
+#         serializers=UserSer(user,data=request.data)
+#         username = request.user.username
+#         if isUser(username,serializers):
+#             user.delete()
+#             return Response(status=status.HTTP_204_NO_CONTENT)
+#         raise PermissionDenied("User Not Have Permission")
+
 class UserDetails(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -49,6 +96,7 @@ class UserDetails(APIView):
     def get(self,request,pk):
         user=self.get_object(pk)
         serializers=UserSer(user)
+        return Response(serializers.data,status=status.HTTP_200_OK)
         username = request.user.username #gets the username of the user in the token
         print("----------",username)
         # print("-------------",user)
@@ -71,12 +119,14 @@ class UserDetails(APIView):
         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
     def delete(self,request,pk):
         user=self.get_object(pk)
-        serializers=UserSer(user,data=request.data)
-        username = request.user.username
-        if isUser(username,serializers):
-            user.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        raise PermissionDenied("User Not Have Permission")
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+        # serializers=UserSer(user,data=request.data)
+        # username = request.user.username
+        # if isUser(username,serializers):
+        #     user.delete()
+        #     return Response(status=status.HTTP_204_NO_CONTENT)
+        # raise PermissionDenied("User Not Have Permission")
 
 class UserLogin(APIView):
     # authentication_classes = [JWTAuthentication]
@@ -147,8 +197,8 @@ class Event_Book(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
     def get(self,request,pk):
         event=self.get_object(pk)
-        
-        serializers=EventSer(event)
+        user= User.objects.get(id=request.user.id)
+        serializers=UserEventSer(user)
         # print(serializers.data)
         # serializers.data['capacity']-=1
         # if serializers.is_valid():
@@ -176,7 +226,14 @@ class Event_Book(APIView):
             otherEvents=Event.objects.filter(name=serializers.data['name'] , capacity__gte=0)
         
         serializers=EventSer(event,data=d,partial=True)
-        userEvent={'eventBooked':[pk]}
+        
+        
+        if request.user.eventBooked:
+            l=[i.id for i in request.user.eventBooked.all()]
+            l.append(pk)
+            userEvent={'eventBooked':l}
+        else:
+            userEvent={'eventBooked':[pk]}
         # user=User.objects.get(id=request.user.id)
         # print("^^^^^^^^^^^",type(request.user))
         tag=UserEventSer(request.user,data=userEvent,partial=True)
@@ -187,7 +244,7 @@ class Event_Book(APIView):
             tag.save()
         #     print("-----------------------",tag.data)
         if serializers.is_valid():
-            event=serializers.save()
+            serializers.save()
             # userEvent={'eventBooked':[pk]}
             # # user=User.objects.get(id=request.user.id)
             # print("^^^^^^^^^^^",type(event))
@@ -195,9 +252,33 @@ class Event_Book(APIView):
             # print("-----------------------",tag.is_valid(),tag.errors,request.user)
             return Response(serializers.data,status=status.HTTP_201_CREATED)
         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+    def delete(self,request,pk):
+        request.user.eventBooked.remove(pk)
+        print("++++++",request.user.eventBooked.all())
+        serializers=UserSer(request.user)
+        # user= User.objects.get(id=request.user.id)
+        # print("++++++",user.eventBooked.all())
+        # l=[i.id for i in request.user.eventBooked.all()]
+        # print(l)
+        # l.remove(pk)
+        # print(l)
+        # userEvent={"id":request.user.id,'eventBooked':l}
+        # serializers=UserEventSer(request.user,data=userEvent)
+        print("---------\n",serializers.data)
+        # if serializers.is_valid():
+        #     print("---------\n",serializers.data)
+        #     print("Helooooooooo")
+            # serializers.save()
+        # serializers.delete()  
+        # serializers.data["eventBooked"].remove(pk)
+        # print("---------\n\n",serializers.data)
+        # serializers.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     
 
 def isUser(username,user):
+    print(user.is_valid())
     if username==user.data['username']:
         return True
     return False
