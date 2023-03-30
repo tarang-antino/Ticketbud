@@ -180,9 +180,8 @@ WSGI_APPLICATION = 'EventManagement.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'event',
+        'NAME': 'ticketdb',
         'USER':config('USER'),
-        'PASSWORD':config('PASSWORD')
     }
 }
 
