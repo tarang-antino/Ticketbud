@@ -27,11 +27,56 @@ CORS_ALLOW_HEADERS = [
                       "origin",
                       "user-agent",
                       "x-csrftoken",
-                      "x-requested-with",] 
+                      "x-requested-with",
+                      ] 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+DEBUG=True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False if DEBUG else True,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s %(levelname)s msg:%(message)s'
+        },
+        'simple': {
+             'format': '%(levelname)s %(asctime)s %(module)s %(lineno)s %(message)s'
+        },
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'info': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, "log/info.log"),
+            'formatter': 'verbose'
+        },
+        'error': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, "log/error.log"),
+        },
+    },
+    'loggers': {
+        "django": {
+            'handlers': ['info'],
+            'propagate': False,
+            'level': "INFO"
+        },
+        "errors": {
+            'handlers': ['error'],
+            'propagate': False,
+            'level': "ERROR"
+        },
+    },
+}
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/

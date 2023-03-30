@@ -39,7 +39,7 @@ class UserList(APIView):
             # return Response(serializers1.data,status=status.HTTP_201_CREATED)
         return Response(serializers1.errors,status=status.HTTP_400_BAD_REQUEST)
 
-#used to directly access the user using tokens
+# --> used to directly access the user using tokens
 # class UserDetails(APIView):
 #     authentication_classes = [JWTAuthentication]
 #     permission_classes = [IsAuthenticated]
@@ -97,6 +97,8 @@ class UserDetails(APIView):
         user=self.get_object(pk)
         serializers=UserSer(user)
         return Response(serializers.data,status=status.HTTP_200_OK)
+    
+        #  --> check current requested user is the user from the tokens
         username = request.user.username #gets the username of the user in the token
         print("----------",username)
         # print("-------------",user)
@@ -112,7 +114,9 @@ class UserDetails(APIView):
         if serializers.is_valid():
             serializers.save()
             username = request.user.username
-            # return Response(serializers.data,status=status.HTTP_201_CREATED)
+            return Response(serializers.data,status=status.HTTP_201_CREATED)
+
+            #  --> check current requested user is the user from the tokens
             if isUser(username,serializers):
                 return Response(serializers.data,status=status.HTTP_201_CREATED)
             raise PermissionDenied("User Not Have Permission")
@@ -121,6 +125,9 @@ class UserDetails(APIView):
         user=self.get_object(pk)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+        # --> check current requested user is the user from the tokens
+
         # serializers=UserSer(user,data=request.data)
         # username = request.user.username
         # if isUser(username,serializers):
@@ -142,14 +149,12 @@ class UserLogin(APIView):
         serializers=UserSer(user)
         # print(serializers.data['password'])
         if user.check_password(password):
-                raise AuthenticationFailed("Password Dont match!!")
-                # return Response(status=status.HTTP_401_UNAUTHORIZED)
-        
-        token=AccessToken.for_user(user)
+                token=AccessToken.for_user(user)
             # print("+++++++++++",type(token))
-        return Response({"data":serializers.data,"token":str(token)},status=status.HTTP_202_CREATED)
-        
-        
+                return Response({"data":serializers.data,"token":str(token)},status=status.HTTP_202_CREATED)
+        raise AuthenticationFailed("Password Dont match!!")
+                # return Response(status=status.HTTP_401_UNAUTHORIZED)
+
 
 class EventList(APIView):
     def get(self,request):
@@ -276,6 +281,16 @@ class Event_Book(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     
+class UpdatePassword(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    def post(self,request,pk):
+        # user=request.user
+        user = User.objects.get(id=pk)
+        if user.check_password(request.data["oldPassword"]):
+            user.set_password(request.data["newPassword"])
+            return Response(status=status.HTTP_202_ACCEPTED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 def isUser(username,user):
     print(user.is_valid())
