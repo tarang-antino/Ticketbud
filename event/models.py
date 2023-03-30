@@ -10,7 +10,7 @@ class User(AbstractUser):
     phoneNumber = models.CharField(validators=[phone_regex], max_length=17, blank=True)
     username = models.CharField(max_length=20,unique=True)
     password=models.CharField(max_length=150)
-    eventBooked=models.ManyToManyField('Event',null=True,blank=True)
+    eventBooked=models.ManyToManyField('Event',blank=True)
     isAdmin=models.BooleanField(default=False)
 
 class Event(models.Model):
