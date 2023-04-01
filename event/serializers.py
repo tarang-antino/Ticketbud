@@ -6,7 +6,7 @@ class UserSer(serializers.ModelSerializer):
         model=User
         fields=['id','name','phoneNumber','username','password','isAdmin'
                 ,'eventBooked'
-                    ,"is_superuser"
+                    # ,"is_superuser"
                 ]
         # fields='__all__'
         extra_kwargs={
@@ -19,12 +19,13 @@ class UserSer(serializers.ModelSerializer):
         isAdmin=validated_data.pop("isAdmin",None)
         # print(password,isAdmin,is_superuser)
         instance=self.Meta.model(**validated_data)
-        print(instance.is_superuser)
+        # print(instance.is_superuser)
         if password is not None:
             instance.set_password(password)
         # if is_superuser is not None:
-        instance.is_superuser=isAdmin
-        instance.isAdmin=isAdmin
+        if isAdmin is not None:
+            instance.is_superuser=isAdmin
+            instance.isAdmin=isAdmin
         instance.save()
         return instance 
 
