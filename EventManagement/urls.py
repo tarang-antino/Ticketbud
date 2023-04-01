@@ -26,6 +26,7 @@ urlpatterns = [
     path('userLogin/',views.UserLogin.as_view()),
     path('Event/',views.EventList.as_view()),
     path('Event/<int:pk>',views.EventDetails.as_view()),
+    path('eventRes/<int:pk>',views.EventRes.as_view()),
     path('eventbook/<int:pk>',views.Event_Book.as_view()),
     path('updatepassword/<int:pk>',views.UpdatePassword.as_view()),
 ]
