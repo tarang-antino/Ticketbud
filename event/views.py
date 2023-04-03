@@ -157,21 +157,25 @@ class UserLogin(APIView):
 
 
 class EventList(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
     def get(self,request):
         Events=Event.objects.all()
         serializers=EventSer(Events,many=True)
         return Response(serializers.data)
     def post(self,request):
         serializers=EventSer(data=request.data)
-
-        if not request.user.isAdmin:
-            if serializers.is_valid():
-                serializers.save()
-                return Response(serializers.data,status=status.HTTP_201_CREATED)
-            return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
-        raise PermissionDenied("User Not Have Permission")
+        if serializers.is_valid():
+            serializers.save()
+            return Response(serializers.data,status=status.HTTP_201_CREATED)
+        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+    # --> check current requested user is the adminuser from the tokens
+        # if not request.user.isAdmin:
+        #     if serializers.is_valid():
+        #         serializers.save()
+        #         return Response(serializers.data,status=status.HTTP_201_CREATED)
+        #     return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+        # raise PermissionDenied("User Not Have Permission")
 
 class EventDetails(APIView):
     authentication_classes = [JWTAuthentication]
@@ -190,20 +194,30 @@ class EventDetails(APIView):
     def put(self,request,pk):
         event=self.get_object(pk)
         serializers=EventSer(event,data=request.data)
-        if not request.user.isAdmin:
-            if serializers.is_valid():
-                serializers.save()
-                return Response(serializers.data,status=status.HTTP_201_CREATED)
-            return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
-        raise PermissionDenied("User Not Have Permission")
+        if serializers.is_valid():
+            serializers.save()
+            return Response(serializers.data,status=status.HTTP_201_CREATED)
+        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+        # --> check current requested user is the adminuser from the tokens
+        # if not request.user.isAdmin:
+        #     if serializers.is_valid():
+        #         serializers.save()
+        #         return Response(serializers.data,status=status.HTTP_201_CREATED)
+        #     return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+        # raise PermissionDenied("User Not Have Permission")
     
     # need to add only if admin in delete of eventdetails
     def delete(self,request,pk):
         event=self.get_object(pk)
-        if not request.user.isAdmin:
-            event.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        raise PermissionDenied("User Not Have Permission")
+        event.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+        # --> check current requested user is the adminuser from the tokens
+        # if not request.user.isAdmin:
+        #     event.delete()
+        #     return Response(status=status.HTTP_204_NO_CONTENT)
+        # raise PermissionDenied("User Not Have Permission")
 
 class Event_Book(APIView):
     authentication_classes = [JWTAuthentication]
