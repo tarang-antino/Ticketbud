@@ -18,11 +18,14 @@ from django.urls import path
 from event import views
 
 urlpatterns = [
+    
     path('admin/', admin.site.urls),
     path('user/',views.UserList.as_view()),
     path('user/<int:pk>',views.UserDetails.as_view()),
+    # path('user/',views.UserDetails.as_view()),  #used for directly accessing the user through token
     path('userLogin/',views.UserLogin.as_view()),
     path('Event/',views.EventList.as_view()),
     path('Event/<int:pk>',views.EventDetails.as_view()),
     path('eventbook/<int:pk>',views.Event_Book.as_view()),
+    path('updatepassword/<int:pk>',views.UpdatePassword.as_view()),
 ]
