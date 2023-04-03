@@ -372,11 +372,11 @@ def isUser(username,user):
 #     def post(self,request):
 #         return self.create(request)
 # class UserDetails(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,generics.GenericAPIView):
-    queryset=User.objects.all()
-    serializer_class=UserSer
-    def get(self,request,pk):
-        return self.retrieve(request,pk)
-    def put(self,request,pk):
-        return self.update(request,pk)
-    def delete(self,request,pk):
-        return self.destroy(request,pk)
+    # queryset=User.objects.all()
+    # serializer_class=UserSer
+    # def get(self,request,pk):
+    #     return self.retrieve(request,pk)
+    # def put(self,request,pk):
+    #     return self.update(request,pk)
+    # def delete(self,request,pk):
+    #     return self.destroy(request,pk)
