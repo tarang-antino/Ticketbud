@@ -12,12 +12,11 @@ from rest_framework.permissions import IsAuthenticated
 from django.http import Http404
 
 
-#isAdmin must be mapped to is_superuser in serializers
 
 class UserList(APIView):
     
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
     def get(self,request):
         Users=User.objects.all()
         serializers=UserSer(Users,many=True)
@@ -26,6 +25,7 @@ class UserList(APIView):
         # r.headers["Access-Control-Allow-Origin"] = "*"
         return r
     def post(self,request):
+        print(request.data)
         serializers1=UserSer(data=request.data)
         if serializers1.is_valid():
             Users=serializers1.save()
@@ -39,7 +39,7 @@ class UserList(APIView):
             # return Response(serializers1.data,status=status.HTTP_201_CREATED)
         return Response(serializers1.errors,status=status.HTTP_400_BAD_REQUEST)
 
-# --> used to directly access the user using tokens
+# -----> used to directly access the user using tokens
 # class UserDetails(APIView):
 #     authentication_classes = [JWTAuthentication]
 #     permission_classes = [IsAuthenticated]
@@ -85,8 +85,8 @@ class UserList(APIView):
 #         raise PermissionDenied("User Not Have Permission")
 
 class UserDetails(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
     def get_object(self,pk):
         try:
             user=User.objects.get(id=pk)
@@ -98,7 +98,7 @@ class UserDetails(APIView):
         serializers=UserSer(user)
         return Response(serializers.data,status=status.HTTP_200_OK)
     
-        #  --> check current requested user is the user from the tokens
+        #  -----> check current requested user is the user from the tokens
         username = request.user.username #gets the username of the user in the token
         print("----------",username)
         # print("-------------",user)
@@ -116,7 +116,7 @@ class UserDetails(APIView):
             username = request.user.username
             return Response(serializers.data,status=status.HTTP_201_CREATED)
 
-            #  --> check current requested user is the user from the tokens
+            #  -----> check current requested user is the user from the tokens
             if isUser(username,serializers):
                 return Response(serializers.data,status=status.HTTP_201_CREATED)
             raise PermissionDenied("User Not Have Permission")
@@ -145,7 +145,7 @@ class UserLogin(APIView):
             user=User.objects.get(username=username)
             
         except User.DoesNotExist:
-             raise AuthenticationFailed("User Not Found")
+             raise AuthenticationFailed("User Not Found in database")
         serializers=UserSer(user)
         # print(serializers.data['password'])
         if user.check_password(password):
@@ -157,13 +157,16 @@ class UserLogin(APIView):
 
 
 class EventList(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self,request):
         Events=Event.objects.all()
         serializers=EventSer(Events,many=True)
         return Response(serializers.data)
     def post(self,request):
         serializers=EventSer(data=request.data)
-        if request.user.isAdmin:
+
+        if not request.user.isAdmin:
             if serializers.is_valid():
                 serializers.save()
                 return Response(serializers.data,status=status.HTTP_201_CREATED)
@@ -171,6 +174,8 @@ class EventList(APIView):
         raise PermissionDenied("User Not Have Permission")
 
 class EventDetails(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     def get_object(self,pk):
         try:
             return Event.objects.get(id=pk)
@@ -180,17 +185,25 @@ class EventDetails(APIView):
         event=self.get_object(pk)
         serializers=EventSer(event)
         return Response(serializers.data)
+    
+    # need to add only if admin in put of eventdetails
     def put(self,request,pk):
         event=self.get_object(pk)
         serializers=EventSer(event,data=request.data)
-        if serializers.is_valid():
-            serializers.save()
-            return Response(serializers.data,status=status.HTTP_201_CREATED)
-        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+        if not request.user.isAdmin:
+            if serializers.is_valid():
+                serializers.save()
+                return Response(serializers.data,status=status.HTTP_201_CREATED)
+            return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+        raise PermissionDenied("User Not Have Permission")
+    
+    # need to add only if admin in delete of eventdetails
     def delete(self,request,pk):
         event=self.get_object(pk)
-        event.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if not request.user.isAdmin:
+            event.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        raise PermissionDenied("User Not Have Permission")
 
 class Event_Book(APIView):
     authentication_classes = [JWTAuthentication]
@@ -212,54 +225,56 @@ class Event_Book(APIView):
         return Response(serializers.data)
     
     def put(self,request,pk):
+        
         event=self.get_object(pk)
         serializers=EventSer(event)
         # print("------------------------",serializers.data['name'])
-        otherEvents=Event.objects.filter(name__startswith=serializers.data['name'] , capacity__gte=0)
-        # print("------------------------",otherEvents)
-        for i in otherEvents:
-            serializersOther=EventSer(i)
+        
             # print("------------------------",serializersOther.data)
         # print("------------------------",request.data)
-        if serializers.data['capacity']>0:
+        if serializers.data['capacity']>0:  #checking capacity is greater than 0
             
-            d={'capacity':serializers.data['capacity']-1}
+            d={'capacity':serializers.data['capacity']-1} #decrementing capacity by one
             
+            # ------>mapping with the user
+            if request.user.eventBooked:
+                l=[i.id for i in request.user.eventBooked.all()]
+                l.append(pk)
+                userEvent={'eventBooked':l}
+            else:
+                userEvent={'eventBooked':[pk]}
+            # user=User.objects.get(id=request.user.id)
+            # print("^^^^^^^^^^^",type(request.user))
+            tag=UserEventSer(request.user,data=userEvent,partial=True)
+            serializers=EventSer(event,data=d,partial=True) # ------>mapping the event with decreased capacity
+            # print("-----------------------",tag.is_valid(),request.user)
+            # print("&&&&&&&&&&&&&&&&&&&&&&&&",tag)
+            if tag.is_valid():
+                # print("Helooooooooo")
+                if serializers.is_valid():
+                    tag.save()
+                    serializers.save()
+                    print(serializers.data)
+            
+                    return Response(serializers.data,status=status.HTTP_201_CREATED)
+
+            return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
         else:
-            d={'capacity':serializers.data['capacity']}
-            # request.data
-            otherEvents=Event.objects.filter(name=serializers.data['name'] , capacity__gte=0)
-        
-        serializers=EventSer(event,data=d,partial=True)
-        
-        
-        if request.user.eventBooked:
-            l=[i.id for i in request.user.eventBooked.all()]
-            l.append(pk)
-            userEvent={'eventBooked':l}
-        else:
-            userEvent={'eventBooked':[pk]}
-        # user=User.objects.get(id=request.user.id)
-        # print("^^^^^^^^^^^",type(request.user))
-        tag=UserEventSer(request.user,data=userEvent,partial=True)
-        # print("-----------------------",tag.is_valid(),request.user)
-        # print("&&&&&&&&&&&&&&&&&&&&&&&&",tag)
-        if tag.is_valid():
-            # print("Helooooooooo")
-            tag.save()
-        #     print("-----------------------",tag.data)
-        if serializers.is_valid():
-            serializers.save()
-            # userEvent={'eventBooked':[pk]}
-            # # user=User.objects.get(id=request.user.id)
-            # print("^^^^^^^^^^^",type(event))
-            # tag=UserEventSer(request.user,data=userEvent,partial=True)
-            # print("-----------------------",tag.is_valid(),tag.errors,request.user)
-            return Response(serializers.data,status=status.HTTP_201_CREATED)
-        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+            # ---> returning the event on different slot with greater capacity than 0
+            otherEvents=Event.objects.filter(name__startswith=serializers.data['name'] , capacity__gte=1)
+            # print("------------------------",otherEvents)
+            events={}
+            for i in otherEvents:
+                serializersOther=EventSer(i)
+                events[serializersOther.data["name"]+str(serializersOther.data["shows"])]=serializersOther.data["capacity"]
+            print(events)
+            return Response(events,status=status.HTTP_200_OK)
+
+    
+    
     def delete(self,request,pk):
         request.user.eventBooked.remove(pk)
-        print("++++++",request.user.eventBooked.all())
+        # print("++++++",request.user.eventBooked.all())
         serializers=UserSer(request.user)
         # user= User.objects.get(id=request.user.id)
         # print("++++++",user.eventBooked.all())
@@ -269,18 +284,64 @@ class Event_Book(APIView):
         # print(l)
         # userEvent={"id":request.user.id,'eventBooked':l}
         # serializers=UserEventSer(request.user,data=userEvent)
-        print("---------\n",serializers.data)
+        # print("---------\n",serializers.data)
         # if serializers.is_valid():
         #     print("---------\n",serializers.data)
         #     print("Helooooooooo")
             # serializers.save()
-        # serializers.delete()  
+        # serializers.delete() 
+        # print("---------\n\n",serializers.data["eventBooked"]) 
         # serializers.data["eventBooked"].remove(pk)
         # print("---------\n\n",serializers.data)
         # serializers.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    
+
+class EventRes(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get_object(self,pk):
+        try:
+            return Event.objects.get(id=pk)
+        except Event.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    def get (self,request,pk):
+        event=self.get_object(pk)
+        serializers=EventSer(event)
+        d={'capacity':serializers.data['capacity']+1} #incrementing capacity by one
+        serializers1=EventSer(event,data=d,partial=True)
+        request.user.eventBooked.remove(pk) #demapping the user
+        if serializers1.is_valid():
+            serializers1.save()
+        otherEvents=Event.objects.filter(name__startswith=serializers.data['name']).exclude(id=serializers.data['id'])
+        # print("------------------------",otherEvents)
+        
+        serializers2=EventSer(otherEvents,many=True)
+        # events={}
+        # for i in otherEvents:
+        #     serializersOther=EventSer(i)
+        #     events[serializersOther.data["name"]+str(serializersOther.data["shows"])]=serializersOther.data["capacity"]
+        # print(events)
+        return Response(serializers2.data,status=status.HTTP_200_OK)
+        # return Response(events,status=status.HTTP_200_OK)
+    # def put(self, request, pk):
+    #     event=self.get_object(pk)
+    #     a=Event_Book()
+    #     # print("-------",a.get(request=request,pk=pk))
+    #     ab=a.put(request=request,pk=pk)
+    #     print(ab.status_code)
+    #     # if ab!=Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST):
+    #     if ab.status_code==201:
+    #         print("---------------------","Hello")
+    #     elif ab.status_code==400:
+    #         print("**********************","bye")
+    #     else:
+    #         print("+++++++++++++","nooooooo")
+        
+    #     return ab
+        
+        
+
 class UpdatePassword(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -290,7 +351,7 @@ class UpdatePassword(APIView):
         if user.check_password(request.data["oldPassword"]):
             user.set_password(request.data["newPassword"])
             return Response(status=status.HTTP_202_ACCEPTED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message":"Password do not match"},status=status.HTTP_400_BAD_REQUEST)
 
 def isUser(username,user):
     print(user.is_valid())
@@ -311,11 +372,11 @@ def isUser(username,user):
 #     def post(self,request):
 #         return self.create(request)
 # class UserDetails(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,generics.GenericAPIView):
-#     queryset=User.objects.all()
-#     serializer_class=UserSer
-#     def get(self,request,pk):
-#         return self.retrieve(request,pk)
-#     def put(self,request,pk):
-#         return self.update(request,pk)
-#     def delete(self,request,pk):
-#         return self.destroy(request,pk)
+    # queryset=User.objects.all()
+    # serializer_class=UserSer
+    # def get(self,request,pk):
+    #     return self.retrieve(request,pk)
+    # def put(self,request,pk):
+    #     return self.update(request,pk)
+    # def delete(self,request,pk):
+    #     return self.destroy(request,pk)
