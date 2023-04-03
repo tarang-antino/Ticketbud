@@ -110,7 +110,7 @@ class UserDetails(APIView):
         raise PermissionDenied("User Not Have Permission")
     def put(self,request,pk):
         user=self.get_object(pk)
-        serializers=UserSer(user,data=request.data)
+        serializers=UserSer(user,data=request.data,partial=True)
         if serializers.is_valid():
             serializers.save()
             username = request.user.username
@@ -151,7 +151,7 @@ class UserLogin(APIView):
         if user.check_password(password):
                 token=AccessToken.for_user(user)
             # print("+++++++++++",type(token))
-                return Response({"data":serializers.data,"token":str(token)},status=status.HTTP_202_CREATED)
+                return Response({"data":serializers.data,"token":str(token)},status=status.HTTP_202_ACCEPTED)
         raise AuthenticationFailed("Password Dont match!!")
                 # return Response(status=status.HTTP_401_UNAUTHORIZED)
 
@@ -193,7 +193,7 @@ class EventDetails(APIView):
     # need to add only if admin in put of eventdetails
     def put(self,request,pk):
         event=self.get_object(pk)
-        serializers=EventSer(event,data=request.data)
+        serializers=EventSer(event,data=request.data,partial=True)
         if serializers.is_valid():
             serializers.save()
             return Response(serializers.data,status=status.HTTP_201_CREATED)
@@ -253,7 +253,13 @@ class Event_Book(APIView):
             # ------>mapping with the user
             if request.user.eventBooked:
                 l=[i.id for i in request.user.eventBooked.all()]
-                l.append(pk)
+                print("------------",l)
+                if pk not in l: #checks the event is already in the event booked list of the user
+                    l.append(pk)
+                    d={'capacity':serializers.data['capacity']-1} #decrementing capacity by one
+                else:
+                    return Response({"message":"Event already booked by the user"},status=status.HTTP_208_ALREADY_REPORTED)
+                print("++++++++++++++",l)
                 userEvent={'eventBooked':l}
             else:
                 userEvent={'eventBooked':[pk]}
@@ -268,7 +274,7 @@ class Event_Book(APIView):
                 if serializers.is_valid():
                     tag.save()
                     serializers.save()
-                    print(serializers.data)
+                    # print(serializers.data)
             
                     return Response(serializers.data,status=status.HTTP_201_CREATED)
 
@@ -287,9 +293,17 @@ class Event_Book(APIView):
     
     
     def delete(self,request,pk):
-        request.user.eventBooked.remove(pk)
+        
         # print("++++++",request.user.eventBooked.all())
-        serializers=UserSer(request.user)
+        
+        event=self.get_object(pk)
+        serializers=EventSer(event)
+        d={'capacity':serializers.data['capacity']+1} #incrementing capacity by one
+        serializers1=EventSer(event,data=d,partial=True)
+        request.user.eventBooked.remove(pk) #demapping the user
+        if serializers1.is_valid():
+            serializers1.save()
+        return Response(serializers1.data,status=status.HTTP_200_OK)
         # user= User.objects.get(id=request.user.id)
         # print("++++++",user.eventBooked.all())
         # l=[i.id for i in request.user.eventBooked.all()]
@@ -364,7 +378,7 @@ class UpdatePassword(APIView):
         user = User.objects.get(id=pk)
         if user.check_password(request.data["oldPassword"]):
             user.set_password(request.data["newPassword"])
-            return Response(status=status.HTTP_202_ACCEPTED)
+            return Response({"message":"Password Updated"},status=status.HTTP_202_ACCEPTED)
         return Response({"message":"Password do not match"},status=status.HTTP_400_BAD_REQUEST)
 
 def isUser(username,user):
