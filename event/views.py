@@ -141,11 +141,12 @@ class UserLogin(APIView):
     def post(self,request):
         username=request.data['username']
         password=request.data['password']
+        # print("++++++++++++++++++",request.data)
         try:
             user=User.objects.get(username=username)
             
         except User.DoesNotExist:
-             raise AuthenticationFailed("User Not Found in database")
+             return Response({"message":"User Not Found in database"},status=status.HTTP_404_NOT_FOUND)
         serializers=UserSer(user)
         # print(serializers.data['password'])
         if user.check_password(password):
@@ -190,7 +191,6 @@ class EventDetails(APIView):
         serializers=EventSer(event)
         return Response(serializers.data)
     
-    # need to add only if admin in put of eventdetails
     def put(self,request,pk):
         event=self.get_object(pk)
         serializers=EventSer(event,data=request.data,partial=True)
@@ -207,7 +207,7 @@ class EventDetails(APIView):
         #     return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
         # raise PermissionDenied("User Not Have Permission")
     
-    # need to add only if admin in delete of eventdetails
+    
     def delete(self,request,pk):
         event=self.get_object(pk)
         event.delete()
@@ -229,8 +229,8 @@ class Event_Book(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
     def get(self,request,pk):
         event=self.get_object(pk)
-        user= User.objects.get(id=request.user.id)
-        serializers=UserEventSer(user)
+        user= User.objects.filter(eventBooked=event)
+        serializers=UserEventSer(user,many=True)
         # print(serializers.data)
         # serializers.data['capacity']-=1
         # if serializers.is_valid():
