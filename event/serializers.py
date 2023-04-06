@@ -17,6 +17,7 @@ class UserSer(serializers.ModelSerializer):
         password=validated_data.pop('password',None)
         # is_superuser=validated_data.pop("is_superuser",None)
         isAdmin=validated_data.pop("isAdmin",None)
+        
         # print(password,isAdmin,is_superuser)
         instance=self.Meta.model(**validated_data)
         # print(instance.is_superuser)
@@ -25,6 +26,7 @@ class UserSer(serializers.ModelSerializer):
         # if is_superuser is not None:
         if isAdmin is not None:
             instance.is_superuser=isAdmin
+            instance.is_staff=isAdmin
             instance.isAdmin=isAdmin
         instance.save()
         return instance 
