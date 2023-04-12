@@ -235,9 +235,8 @@ WSGI_APPLICATION = 'EventManagement.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'event',
+        'NAME': 'ticketdb',
         'USER':config('USER'),
-        'PASSWORD':config('PASSWORD')
     }
 }
 
@@ -286,6 +285,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL='event.User'
 
+
 #celery
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 CELERY_ACCEPT_CONTENT = ['application/json']
@@ -300,3 +300,4 @@ EMAIL_HOST_PASSWORD = 'emneuypzqwtozwoa'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'tarangleo@gmail.com'
+

@@ -1,0 +1,17 @@
+version: '3.4'
+services:
+  ticket:
+     image: ticket-bud
+     build:
+      context: .
+      dockerfile: ./Dockerfile
+     container_name: ticketbud-be
+     depends_on:
+       - mysql
+     ports:
+       - 8080:8080
+  mysql:
+     image: sql
+     container_name: msql
+     ports:
+       - "3306:3306"
