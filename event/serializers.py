@@ -5,7 +5,7 @@ class UserSer(serializers.ModelSerializer):
     class Meta:
         model=User
         fields=['id','name','phoneNumber','username','password','isAdmin'
-                ,'eventBooked'
+                ,'eventBooked',"email"
                     # ,"is_superuser"
                 ]
         # fields='__all__'

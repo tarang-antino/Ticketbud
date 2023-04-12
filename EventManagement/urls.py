@@ -29,4 +29,15 @@ urlpatterns = [
     path('eventRes/<int:pk>',views.EventRes.as_view()),
     path('eventbook/<int:pk>',views.Event_Book.as_view()),
     path('updatepassword/<int:pk>',views.UpdatePassword.as_view()),
+    path('forgotpassword/',views.ForgotPassword.as_view()),
+    path('myevent/<int:pk>',views.MyEvents.as_view()),
+
+    #temprory
+    path('usertemp/',views.UserListNew.as_view()),
+    path('usertemp/<int:pk>',views.UserDetailsNew.as_view()),
+    path('Eventtemp/',views.EventListNew.as_view()),
+    path('Eventtemp/<int:pk>',views.EventDetailsNew.as_view()),
+    path('eventRestemp/<int:pk>',views.EventResNew.as_view()),
+    path('eventbooktemp/<int:pk>',views.Event_BookNew.as_view()),
+    path('eventbookdel/<int:pk>',views.Event_Book_Delete.as_view()),
 ]

@@ -90,6 +90,12 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 # CORS_ALLOW_ALL_ORIGINS: True
 CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:4200'
+]
+
+
 CORS_ALLOW_METHODS = [
     "DELETE",
     "GET",
@@ -279,3 +285,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 AUTH_USER_MODEL='event.User'
+
+#celery
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Kolkata'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'tarangleo@gmail.com'
+EMAIL_HOST_PASSWORD = 'emneuypzqwtozwoa'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'tarangleo@gmail.com'
