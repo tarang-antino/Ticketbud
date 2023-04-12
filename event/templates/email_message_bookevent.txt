@@ -1,0 +1,10 @@
+Hello {{name|safe}},
+Your event {{eventName|safe}} is Booked. Please fixed your time {{time:safe}} for the amazing event.
+
+We are waiting for you.....Come visit us at:
+Follow this link:- http://localhost:4200
+
+Thank You!!
+
+Regards
+Team TicketBud

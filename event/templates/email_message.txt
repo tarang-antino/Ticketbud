@@ -1,0 +1,7 @@
+Hello {{name|safe}},
+Your OTP to reset your password is {{otp|safe}}
+
+Thank You!!
+
+Regards
+Team TicketBud
