@@ -18,26 +18,28 @@ from django.urls import path
 from event import views
 
 urlpatterns = [
-    
-    path('admin/', admin.site.urls),
-    path('user/',views.UserList.as_view()),
-    path('user/<int:pk>',views.UserDetails.as_view()),
-    # path('user/',views.UserDetails.as_view()),  #used for directly accessing the user through token
-    path('userLogin/',views.UserLogin.as_view()),
-    path('Event/',views.EventList.as_view()),
-    path('Event/<int:pk>',views.EventDetails.as_view()),
-    path('eventRes/<int:pk>',views.EventRes.as_view()),
-    path('eventbook/<int:pk>',views.Event_Book.as_view()),
-    path('updatepassword/<int:pk>',views.UpdatePassword.as_view()),
-    path('forgotpassword/',views.ForgotPassword.as_view()),
-    path('myevent/<int:pk>',views.MyEvents.as_view()),
 
-    #temprory
-    path('usertemp/',views.UserListNew.as_view()),
-    path('usertemp/<int:pk>',views.UserDetailsNew.as_view()),
-    path('Eventtemp/',views.EventListNew.as_view()),
-    path('Eventtemp/<int:pk>',views.EventDetailsNew.as_view()),
-    path('eventRestemp/<int:pk>',views.EventResNew.as_view()),
-    path('eventbooktemp/<int:pk>',views.Event_BookNew.as_view()),
-    path('eventbookdel/<int:pk>',views.Event_Book_Delete.as_view()),
+    path('admin/', admin.site.urls),
+    path('user/', views.UserList.as_view()),
+    path('user/<int:pk>', views.UserDetails.as_view()),
+    # path('user/',views.UserDetails.as_view()),  #used for directly accessing the user through token
+    path('userLogin/', views.UserLogin.as_view()),
+    path('Event/', views.EventList.as_view()),
+    path('Event/<int:pk>', views.EventDetails.as_view()),
+    path('eventRes/<int:pk>', views.EventRes.as_view()),
+    path('eventbook/<int:pk>', views.Event_Book.as_view()),
+    path('updatepassword/<int:pk>', views.UpdatePassword.as_view()),
+    path('forgotpassword/', views.ForgotPassword.as_view()),
+    path('myevent/<int:pk>', views.MyEvents.as_view()),
+    path('Home/', views.HomeList.as_view()),
+
+    # temporary
+    path('usertemp/', views.UserListNew.as_view()),
+    path('hometemp/', views.HomeListNew.as_view()),
+    path('usertemp/<int:pk>', views.UserDetailsNew.as_view()),
+    path('Eventtemp/', views.EventListNew.as_view()),
+    path('Eventtemp/<int:pk>', views.EventDetailsNew.as_view()),
+    path('eventRestemp/<int:pk>', views.EventResNew.as_view()),
+    path('eventbooktemp/<int:pk>', views.Event_BookNew.as_view()),
+    path('eventbookdel/<int:pk>', views.Event_Book_Delete.as_view()),
 ]

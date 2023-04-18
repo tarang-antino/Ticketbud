@@ -1,6 +1,5 @@
 Hello {{name|safe}},
-Your event {{eventName|safe}} is Booked. Please fixed your time {{time|safe}} for the amazing event.
-
+You have successfully updated the password.
 We are waiting for you...
 
 Come visit us at:
