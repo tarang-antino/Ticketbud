@@ -1,0 +1,12 @@
+Performing system checks...
+
+System check identified some issues:
+
+WARNINGS:
+event.User.eventBooked: (fields.W340) null has no effect on ManyToManyField.
+
+System check identified 1 issue (0 silenced).
+March 30, 2023 - 11:40:45
+Django version 4.1.7, using settings 'EventManagement.settings'
+Starting development server at http://0.0.0.0:8080/
+Quit the server with CONTROL-C.
