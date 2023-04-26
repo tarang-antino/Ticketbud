@@ -1,0 +1,12 @@
+Hello {{name|safe}},
+You requested to reschedule event {{eventName|safe}} from time {{time|safe}}. Please book your event in other time slot.
+
+We are waiting for you...
+
+Come visit us at:
+Follow this link:- http://localhost:4200/reschedule/{{eventId|safe}}?userid={{userid|safe}}&id={{eventId|safe}}
+
+Thank You!!
+
+Regards
+Team TicketBud

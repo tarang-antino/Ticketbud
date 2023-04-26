@@ -1,8 +1,9 @@
 Hello {{name|safe}},
 Welcome aboard!
 We are here to Book and Manage EVENTS for you!!!!
-We are waiting for you.....Come visit us at:
+We are waiting for you...
 
+Come visit us at:
 Follow this link:- http://localhost:4200
 
 Thank You!!

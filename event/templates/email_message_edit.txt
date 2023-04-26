@@ -1,0 +1,16 @@
+Hello {{name|safe}},
+You have successfully updated your following details.
+
+{%if Updname%} Name: {{name|safe}} {% endif %}
+{%if phn%} Phone Number: {{phn|safe}} {% endif %}
+{%if email%} Email: {{email|safe}} {% endif %}
+
+We are waiting for you...
+
+Come visit us at:
+Follow this link:- http://localhost:4200
+
+Thank You!!
+
+Regards
+Team TicketBud
